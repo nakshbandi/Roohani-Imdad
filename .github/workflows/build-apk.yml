@@ -13,19 +13,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract FINAL v6 project
+      - name: Extract FINAL v7 project
         run: |
           rm -rf buildsrc
           mkdir -p buildsrc
-          unzip -q Roohani_Imdad_FINAL_v6_UPI_QR_WHATSAPP.zip -d buildsrc
+          unzip -q Roohani_Imdad_FINAL_v7_PASSWORD_CHANGE_FIXED.zip -d buildsrc
 
-      - name: Verify FINAL v6 source
+      - name: Verify FINAL v7 source
         run: |
           PROJECT_DIR="buildsrc/Roohani_Imdad_Hinglish_FIXED"
           test -f "$PROJECT_DIR/app/build.gradle"
-          grep -q "WhatsApp: Raseed + QR" "$PROJECT_DIR/app/src/main/assets/index.html"
+          test -f "$PROJECT_DIR/app/src/main/assets/index.html"
+          grep -q "Password" "$PROJECT_DIR/app/src/main/assets/index.html"
           grep -q "generateUpiQr" "$PROJECT_DIR/app/src/main/assets/index.html"
-          echo "FINAL v6 QR + WhatsApp source verified."
+          echo "FINAL v7 source verified."
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -46,13 +47,13 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Build FINAL v6 APK
+      - name: Build FINAL v7 APK
         working-directory: buildsrc/Roohani_Imdad_Hinglish_FIXED
         run: gradle assembleDebug
 
-      - name: Upload FINAL v6 APK
+      - name: Upload FINAL v7 APK
         uses: actions/upload-artifact@v4
         with:
-          name: Roohani-Imdad-FINAL-v6-APK
+          name: Roohani-Imdad-FINAL-v7-APK
           path: buildsrc/Roohani_Imdad_Hinglish_FIXED/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
