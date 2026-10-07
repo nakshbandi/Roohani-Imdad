@@ -16,7 +16,7 @@ jobs:
       - name: Extract Hinglish Android project
         run: |
           mkdir buildsrc
-          unzip -q Roohani_Imdad_Hinglish_Final_v2_Project.zip -d buildsrc
+          unzip -q Roohani_Imdad_Hinglish_FIXED_Project.zip -d buildsrc
 
       - name: Setup Java
         uses: actions/setup-java@v4
