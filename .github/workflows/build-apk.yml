@@ -13,10 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract Android project
+      - name: Extract Hinglish Android project
         run: |
           mkdir buildsrc
-          unzip -q Roohani_Imdad_Final_Android_Project.zip -d buildsrc
+          unzip -q Roohani_Imdad_Hinglish_Final_v2_Project.zip -d buildsrc
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -27,7 +27,8 @@ jobs:
       - name: Setup Android
         uses: android-actions/setup-android@v4
         with:
-            packages: ''
+          packages: ''
+
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses
 
