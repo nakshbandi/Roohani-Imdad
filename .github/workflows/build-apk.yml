@@ -13,69 +13,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract FINAL project
+      - name: Extract FINAL v6 project
         run: |
+          rm -rf buildsrc
           mkdir -p buildsrc
-          unzip -q Roohani_Imdad_FINAL_v4_UPI_Print_Share.zip -d buildsrc
+          unzip -q Roohani_Imdad_FINAL_v6_UPI_QR_WHATSAPP.zip -d buildsrc
 
-      - name: Find Android project
+      - name: Verify FINAL v6 source
         run: |
-          PROJECT_DIR=$(dirname "$(find buildsrc -name settings.gradle -type f -print -quit)")
-          if [ -z "$PROJECT_DIR" ] || [ "$PROJECT_DIR" = "." ]; then
-            PROJECT_DIR=$(dirname "$(find buildsrc -name build.gradle -type f -print -quit)")
-          fi
-
-          echo "PROJECT_DIR=$PROJECT_DIR"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-
+          PROJECT_DIR="buildsrc/Roohani_Imdad_Hinglish_FIXED"
           test -f "$PROJECT_DIR/app/build.gradle"
-
-      - name: Verify FINAL source
-        run: |
-          echo "Checking FINAL source..."
-
-          grep -R "New Raseed" "$PROJECT_DIR" || {
-            echo "ERROR: New Raseed text not found!"
-            exit 1
-          }
-
-          grep -R "Donor Name" "$PROJECT_DIR" || {
-            echo "ERROR: Donor Name text not found!"
-            exit 1
-          }
-
-          grep -R "Reports" "$PROJECT_DIR" || {
-            echo "ERROR: Reports text not found!"
-            exit 1
-          }
-
-          if grep -R -P '[\x{0900}-\x{097F}]' "$PROJECT_DIR"; then
-            echo "ERROR: Hindi/Devanagari text found!"
-            exit 1
-          fi
-
-          echo "OK: FINAL Hinglish source verified"
-
-      - name: Clean old APK
-        run: |
-          rm -rf "$PROJECT_DIR/app/build"
+          grep -q "WhatsApp: Raseed + QR" "$PROJECT_DIR/app/src/main/assets/index.html"
+          grep -q "generateUpiQr" "$PROJECT_DIR/app/src/main/assets/index.html"
+          echo "FINAL v6 QR + WhatsApp source verified."
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
       - name: Setup Android
         uses: android-actions/setup-android@v4
-        with:
-          packages: ''
-
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses
 
       - name: Install Android SDK
         run: |
+          yes | sdkmanager --licenses || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Setup Gradle
@@ -83,21 +46,13 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Build FINAL APK
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: |
-          gradle assembleDebug
+      - name: Build FINAL v6 APK
+        working-directory: buildsrc/Roohani_Imdad_Hinglish_FIXED
+        run: gradle assembleDebug
 
-      - name: Check APK
-        run: |
-          APK=$(find "$PROJECT_DIR/app/build/outputs/apk/debug" -name "*.apk" -type f -print -quit)
-          test -n "$APK"
-          echo "APK created: $APK"
-          ls -lh "$APK"
-
-      - name: Upload FINAL APK
+      - name: Upload FINAL v6 APK
         uses: actions/upload-artifact@v4
         with:
-          name: Roohani-Imdad-FINAL-APK
-          path: buildsrc/**/app/build/outputs/apk/debug/*.apk
+          name: Roohani-Imdad-FINAL-v6-APK
+          path: buildsrc/Roohani_Imdad_Hinglish_FIXED/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
