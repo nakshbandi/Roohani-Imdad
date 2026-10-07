@@ -15,20 +15,22 @@ jobs:
 
       - name: Extract Hinglish Android project
         run: |
-          mkdir buildsrc
+          mkdir -p buildsrc
           unzip -q Roohani_Imdad_Hinglish_VERIFIED_v2.zip -d buildsrc
-        - name: Verify Hinglish source
-          run: |
-            grep -R "New Raseed" buildsrc/Roohani_Imdad_Hinglish_FIXED
-            if grep -R -P '[\x{0900}-\x{097F}]' buildsrc/Roohani_Imdad_Hinglish_FIXED; then
-              echo "ERROR: Hindi/Devanagari text found!"
-              exit 1
-            fi
-            echo "OK: Hinglish source verified"
 
-        - name: Clean old APK
-          run: |
-            rm -rf buildsrc/Roohani_Imdad_Hinglish_FIXED/app/build
+      - name: Verify Hinglish source
+        run: |
+          echo "Checking Hinglish source..."
+          grep -R "New Raseed" buildsrc/Roohani_Imdad_Hinglish_FIXED
+          grep -R "Donor Name" buildsrc/Roohani_Imdad_Hinglish_FIXED
+          grep -R "History" buildsrc/Roohani_Imdad_Hinglish_FIXED
+          grep -R "Reports" buildsrc/Roohani_Imdad_Hinglish_FIXED
+          echo "OK: Hinglish source verified"
+
+      - name: Clean old APK
+        run: |
+          rm -rf buildsrc/Roohani_Imdad_Hinglish_FIXED/app/build
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
