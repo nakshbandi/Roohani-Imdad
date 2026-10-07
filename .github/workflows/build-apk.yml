@@ -17,7 +17,7 @@ jobs:
         run: |
           rm -rf buildsrc
           mkdir -p buildsrc
-          unzip -q Roohani_Imdad_GRAND_FINAL_GREEN_RECEIPT.zip -d buildsrc
+          unzip -q Roohani_Imdad_GRAND_FINAL_GREEN_RECEIPT_ARABIC_FOOTER_IMAGE_RECEIPT.zip -d buildsrc
 
       - name: Find Android project
         run: |
