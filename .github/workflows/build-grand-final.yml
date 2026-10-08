@@ -1,0 +1,79 @@
+name: Build Roohani Imdad GRAND FINAL APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Roohani_Imdad_GRAND_FINAL.zip'
+      - '.github/workflows/build-grand-final.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract GRAND FINAL project
+        run: |
+          set -e
+          test -f Roohani_Imdad_GRAND_FINAL.zip
+          unzip -q Roohani_Imdad_GRAND_FINAL.zip
+          cd Roohani_Imdad_Secure_Production
+          test -f app/google-services.json
+          test -f firestore/firestore.rules
+          grep -q "com.roohaniimdad.eraseed" app/google-services.json
+          grep -q "com.google.gms.google-services' version '4.4.4'" build.gradle
+          grep -q 'upi://pay?pa=' app/src/main/java/com/roohaniimdad/eraseed/MainActivity.java
+          grep -q 'function cancelRaseed' app/src/main/assets/index.html
+          grep -q 'function handleAndroidBack' app/src/main/assets/index.html
+          grep -q 'allow create: if (isAdmin() || isCollector())' firestore/firestore.rules
+          ! grep -Rqi 'firebase-functions\|getHttpsCallable\|FirebaseFunctions' app
+
+      - name: Validate HTML JavaScript
+        working-directory: Roohani_Imdad_Secure_Production
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('app/src/main/assets/index.html').read_text()
+          blocks=re.findall(r'<script>(.*?)</script>',s,re.S)
+          assert blocks, 'No script block found'
+          Path('/tmp/index.js').write_text('\n'.join(blocks))
+          PY
+          node --check /tmp/index.js
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build GRAND FINAL APK
+        working-directory: Roohani_Imdad_Secure_Production
+        run: gradle --no-daemon clean assembleDebug
+
+      - name: Upload GRAND FINAL APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roohani-Imdad-GRAND-FINAL-APK
+          path: Roohani_Imdad_Secure_Production/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload Firestore rules
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roohani-Imdad-GRAND-FINAL-Firestore-Rules
+          path: Roohani_Imdad_Secure_Production/firestore/firestore.rules
+          if-no-files-found: error
