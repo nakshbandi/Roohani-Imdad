@@ -22,7 +22,20 @@ jobs:
           test -f firestore/firestore.rules
           grep -q 'com.roohaniimdad.eraseed' app/google-services.json
           ! grep -Rqi 'firebase-functions\|getHttpsCallable\|FirebaseFunctions' app
-
+      - name: Fix Google Services Gradle plugin
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("Roohani_Imdad_Secure_Production/build.gradle")
+          s = p.read_text()
+          if "com.google.gms.google-services" not in s:
+              s = s.replace(
+                  "id 'com.android.application' version '8.7.3' apply false",
+                  "id 'com.android.application' version '8.7.3' apply false\n"
+                  "    id 'com.google.gms.google-services' version '4.4.4' apply false"
+              )
+              p.write_text(s)
+          PY
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
