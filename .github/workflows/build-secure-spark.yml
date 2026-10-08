@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,12 +23,15 @@ jobs:
           test -f firestore/firestore.rules
           grep -q 'com.roohaniimdad.eraseed' app/google-services.json
           ! grep -Rqi 'firebase-functions\|getHttpsCallable\|FirebaseFunctions' app
+
       - name: Fix Google Services Gradle plugin
         run: |
           python3 - <<'PY'
           from pathlib import Path
+
           p = Path("Roohani_Imdad_Secure_Production/build.gradle")
           s = p.read_text()
+
           if "com.google.gms.google-services" not in s:
               s = s.replace(
                   "id 'com.android.application' version '8.7.3' apply false",
@@ -36,6 +40,34 @@ jobs:
               )
               p.write_text(s)
           PY
+
+      - name: Fix Java compile errors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path(
+              "Roohani_Imdad_Secure_Production/app/src/main/java/"
+              "com/roohaniimdad/eraseed/MainActivity.java"
+          )
+
+          s = p.read_text()
+
+          s = s.replace(
+              "t.addOnSuccessListener(MainActivity.this::sendReceipts)",
+              "t.addOnSuccessListener(qs -> sendReceipts(qs))"
+          )
+
+          s = re.sub(
+              r'\bObject\s+ts\s*=\s*d\.getTimestamp\("date"\)',
+              'com.google.firebase.Timestamp ts=d.getTimestamp("date")',
+              s
+          )
+
+          p.write_text(s)
+          PY
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -46,7 +78,8 @@ jobs:
         uses: android-actions/setup-android@v4
 
       - name: Install Android SDK packages
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+        run: |
+          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
