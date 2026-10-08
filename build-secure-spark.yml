@@ -1,0 +1,58 @@
+name: Build Roohani Imdad Secure Spark APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Roohani_Imdad_SECURE_SPARK_BUILD.zip'
+      - '.github/workflows/build-secure-spark.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract secure Spark project
+        run: |
+          unzip -q Roohani_Imdad_SECURE_SPARK_BUILD.zip
+          cd Roohani_Imdad_Secure_Production
+          test -f app/google-services.json
+          test -f firestore/firestore.rules
+          grep -q 'com.roohaniimdad.eraseed' app/google-services.json
+          ! grep -Rqi 'firebase-functions\|getHttpsCallable\|FirebaseFunctions' app
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build secure APK
+        working-directory: Roohani_Imdad_Secure_Production
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload secure APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roohani-Imdad-SECURE-SPARK-APK
+          path: Roohani_Imdad_Secure_Production/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload Firestore rules
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roohani-Imdad-Firestore-Rules
+          path: Roohani_Imdad_Secure_Production/firestore/firestore.rules
