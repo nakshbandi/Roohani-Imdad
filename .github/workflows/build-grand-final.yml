@@ -1,25 +1,28 @@
-name: Build Roohani Imdad GRAND FINAL APK
+
+name: Build Roohani Imdad GRAND FINAL COLLECTOR APK
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'Roohani_Imdad_GRAND_FINAL.zip'
+      - 'Roohani_Imdad_GRAND_FINAL_COLLECTOR.zip'
       - '.github/workflows/build-grand-final.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract and validate GRAND FINAL project
+      - name: Extract and validate COLLECTOR project
         run: |
           set -euo pipefail
-          test -f Roohani_Imdad_GRAND_FINAL.zip
-          unzip -q Roohani_Imdad_GRAND_FINAL.zip
+          test -f Roohani_Imdad_GRAND_FINAL_COLLECTOR.zip
+          unzip -q Roohani_Imdad_GRAND_FINAL_COLLECTOR.zip
           cd Roohani_Imdad_Secure_Production
+
           test -f app/google-services.json
           test -f firestore/firestore.rules
           grep -q "com.roohaniimdad.eraseed" app/google-services.json
@@ -37,8 +40,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          s=Path('app/src/main/assets/index.html').read_text()
-          blocks=re.findall(r'<script>(.*?)</script>',s,re.S)
+          s = Path('app/src/main/assets/index.html').read_text()
+          blocks = re.findall(r'<script>(.*?)</script>', s, re.S)
           assert blocks, 'No script block found'
           Path('/tmp/index.js').write_text('\n'.join(blocks))
           PY
@@ -50,7 +53,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK (runner preinstalled SDK)
+      - name: Setup Android SDK
         shell: bash
         run: |
           set -euo pipefail
@@ -59,8 +62,12 @@ jobs:
           echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
           echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
           echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+
           SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$SDKMANAGER" ]; then SDKMANAGER="$(command -v sdkmanager)"; fi
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER="$(command -v sdkmanager)"
+          fi
+
           test -x "$SDKMANAGER"
           "$SDKMANAGER" --sdk_root="$SDK_ROOT" --version
           yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses >/dev/null || true
@@ -71,20 +78,20 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Build GRAND FINAL APK
+      - name: Build COLLECTOR APK
         working-directory: Roohani_Imdad_Secure_Production
         run: gradle --no-daemon clean assembleDebug
 
-      - name: Upload GRAND FINAL APK
+      - name: Upload COLLECTOR APK
         uses: actions/upload-artifact@v4
         with:
-          name: Roohani-Imdad-GRAND-FINAL-APK
+          name: Roohani-Imdad-GRAND-FINAL-COLLECTOR-APK
           path: Roohani_Imdad_Secure_Production/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      - name: Upload Firestore rules
+      - name: Upload COLLECTOR Firestore Rules
         uses: actions/upload-artifact@v4
         with:
-          name: Roohani-Imdad-GRAND-FINAL-Firestore-Rules
+          name: Roohani-Imdad-GRAND-FINAL-COLLECTOR-Firestore-Rules
           path: Roohani_Imdad_Secure_Production/firestore/firestore.rules
           if-no-files-found: error
