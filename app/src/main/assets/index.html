@@ -9,65 +9,24 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
-    body { 
-      background-color: #eef2f5; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    }
-    .app-header { 
-      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
-      color: white; 
-      padding: 22px 15px; 
-      border-radius: 0 0 20px 20px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
-    .card-custom { 
-      border: none;
-      border-radius: 16px; 
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
-      background: #ffffff;
-    }
-    .btn-emerald { 
-      background: linear-gradient(135deg, #008751 0%, #006838 100%); 
-      color: white; 
-      border: none;
-      border-radius: 10px;
-      transition: all 0.3s ease;
-    }
-    .btn-emerald:hover { 
-      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
-      color: white; 
-      box-shadow: 0 4px 12px rgba(0,135,81,0.3);
-    }
-    .form-control {
-      border-radius: 10px;
-      padding: 10px 14px;
-      border: 1px solid #ced4da;
-    }
-    .form-control:focus {
-      border-color: #008751;
-      box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.25);
-    }
-    .nav-pills .nav-link.active {
-      background-color: #008751 !important;
-      border-radius: 10px;
-    }
-    .nav-pills .nav-link {
-      color: #006838;
-      font-weight: 600;
-    }
+    body { background-color: #f4f6f9; font-family: sans-serif; }
+    .app-header { background-color: #007a4d; color: white; padding: 15px; border-radius: 0 0 15px 15px; }
+    .card-custom { border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .btn-emerald { background-color: #007a4d; color: white; }
+    .btn-emerald:hover { background-color: #00613d; color: white; }
   </style>
 </head>
 <body>
 
-  <div class="app-header text-center mb-4">
-    <h3 class="fw-bold m-0" style="letter-spacing: 0.5px;">Roohani Imdad E-Raseed</h3>
-    <small style="opacity: 0.9;">Secure Online Donation • Receipt • Reports</small>
+  <div class="app-header text-center mb-3">
+    <h3 class="fw-bold m-0">Roohani Imdad E-Raseed</h3>
+    <small>Secure Online Donation • Receipt • Reports</small>
   </div>
 
   <div class="container pb-5" id="appContent">
     <!-- Login View -->
     <div id="loginSection" class="card card-custom p-4 mx-auto" style="max-width: 400px;">
-      <h4 class="fw-bold mb-3 text-center" style="color: #006838;">Secure Login</h4>
+      <h4 class="fw-bold mb-3">Secure Login</h4>
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username</label>
@@ -77,13 +36,13 @@
           <label class="form-label fw-semibold">Password</label>
           <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
         </div>
-        <button type="submit" class="btn btn-emerald w-100 fw-bold py-2 mt-2">Login</button>
+        <button type="submit" class="btn btn-emerald w-100 fw-bold py-2">Login</button>
       </form>
     </div>
 
     <!-- Main Navigation View (Hidden by default) -->
     <div id="mainSection" class="d-none">
-      <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
+      <ul class="nav nav-pills nav-fill mb-3 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
         <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed')">New Raseed</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('history')">History</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('reports')">Reports</a></li>
@@ -92,9 +51,9 @@
 
       <!-- Collectors Section -->
       <div id="collectorsView" class="tab-content-view d-none">
-        <h3 class="fw-bold mb-3" style="color: #006838;">Collectors</h3>
+        <h3 class="fw-bold mb-3">Collectors</h3>
         <div class="card card-custom p-4 mb-4">
-          <h5 class="fw-bold mb-3" style="color: #008751;">New Collector Add Karein</h5>
+          <h5 class="fw-bold mb-3">New Collector Add Karein</h5>
           <form id="addCollectorForm">
             <div class="mb-3">
               <label class="form-label fw-semibold">Collector Name *</label>
@@ -112,7 +71,7 @@
               <label class="form-label fw-semibold">Confirm Password *</label>
               <input type="password" id="collectorConfirmPassword" class="form-control" placeholder="Repeat password" required>
             </div>
-            <button type="submit" class="btn btn-emerald w-100 fw-bold py-2 mt-2">Add Collector</button>
+            <button type="submit" class="btn btn-emerald w-100 fw-bold py-2">Add Collector</button>
           </form>
         </div>
       </div>
