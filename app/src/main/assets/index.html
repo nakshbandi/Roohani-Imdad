@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roohani Imdad E-Raseed</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { background-color: #f4f6f9; font-family: sans-serif; }
+        .header-bg { background-color: #198754; color: white; padding: 15px; border-radius: 0 0 15px 15px; }
+        .card { border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="header-bg text-center mb-3">
+        <h3>Roohani Imdad E-Raseed</h3>
+        <small>Secure Online Donation • Receipt • Reports</small>
+    </div>
+
+    <div class="container my-3" id="app-container">
+        <!-- Login Section -->
+        <div id="login-section" class="card p-4">
+            <h4 class="mb-3">Secure Login</h4>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" id="login-user" class="form-control" placeholder="Username">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" id="login-pass" class="form-control" placeholder="Password">
+            </div>
+            <button class="btn btn-success w-100" onclick="handleLogin()">Login</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" style="display:none;">
+            <ul class="nav nav-pills mb-3 justify-content-center" id="pills-tab" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-receipt">New Raseed</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-history">History</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-reports">Reports</button></li>
+                <li class="nav-item" id="collector-tab-btn" style="display:none;"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-collectors">Collectors</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- New Raseed Tab -->
+                <div class="tab-pane fade show active" id="tab-receipt">
+                    <div class="card p-3">
+                        <h5>Generate Receipt</h5>
+                        <div class="mb-2">
+                            <label class="form-label">Donor Name</label>
+                            <input type="text" id="donor-name" class="form-control" placeholder="Enter name">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" id="donor-amount" class="form-control" placeholder="Amount">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">UPI QR Payment (Reshma Bano SBI)</label>
+                            <div class="text-center p-2 border bg-light">
+                                <span class="text-success fw-bold">UPI Verified: 30 ₹ Received</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100 mb-2" onclick="saveReceipt()">Save & Share WhatsApp</button>
+                        <button class="btn btn-secondary w-100" onclick="clearForm()">Cancel / New Raseed</button>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-pane fade" id="tab-history">
+                    <div class="card p-3">
+                        <h5>Receipt History</h5>
+                        <div id="receipt-history-list">No receipts yet.</div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div class="tab-pane fade" id="tab-reports">
+                    <div class="card p-3">
+                        <h5>Collection Reports</h5>
+                        <p>Total Collections and summary will appear here.</p>
+                    </div>
+                </div>
+
+                <!-- Collectors Tab -->
+                <div class="tab-pane fade" id="tab-collectors">
+                    <div class="card p-3">
+                        <h5>Collectors Management</h5>
+                        <div class="mb-3">
+                            <input type="text" id="new-col-name" class="form-control mb-2" placeholder="Collector Name">
+                            <input type="text" id="new-col-user" class="form-control mb-2" placeholder="Username">
+                            <input type="password" id="new-col-pass" class="form-control mb-2" placeholder="Password">
+                            <button class="btn btn-success w-100" onclick="addCollector()">Add Collector</button>
+                        </div>
+                        <div id="collectors-list">No collectors yet.</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline-danger w-100 mt-3" onclick="handleLogout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+            if(u === 'admin' && p === 'admin123') {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('collector-tab-btn').style.display = 'block';
+            } else if(u !== '' && p !== '') {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                document.getElementById('collector-tab-btn').style.display = 'none';
+            } else {
+                alert('Please enter valid credentials');
+            }
+        }
+        function handleLogout() {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'none';
+        }
+        function saveReceipt() {
+            alert('Receipt saved & ready for WhatsApp sharing!');
+            clearForm();
+        }
+        function clearForm() {
+            document.getElementById('donor-name').value = '';
+            document.getElementById('donor-amount').value = '';
+        }
+        function addCollector() {
+            alert('Collector added successfully!');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+                              </html>
