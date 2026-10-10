@@ -49,6 +49,40 @@
         <li class="nav-item" id="collectorsTabNav"><a class="nav-link" href="#" onclick="switchTab('collectors')">Collectors</a></li>
       </ul>
 
+      <!-- Raseed View -->
+      <div id="raseedView" class="tab-content-view">
+        <h3 class="fw-bold mb-3">New Raseed</h3>
+        <div class="card card-custom p-4">
+          <form id="raseedForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Donor Name</label>
+              <input type="text" id="donorName" class="form-control" placeholder="Full name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₹)</label>
+              <input type="number" id="donorAmount" class="form-control" placeholder="Enter amount" required>
+            </div>
+            <button type="submit" class="btn btn-emerald w-100 fw-bold py-2">Submit Raseed</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- History View -->
+      <div id="historyView" class="tab-content-view d-none">
+        <h3 class="fw-bold mb-3">History</h3>
+        <div id="historyList" class="card card-custom p-3">
+          <p class="text-muted text-center m-0">No records found.</p>
+        </div>
+      </div>
+
+      <!-- Reports View -->
+      <div id="reportsView" class="tab-content-view d-none">
+        <h3 class="fw-bold mb-3">Reports</h3>
+        <div class="card card-custom p-3">
+          <p class="text-muted text-center m-0">Reports data loading...</p>
+        </div>
+      </div>
+
       <!-- Collectors Section -->
       <div id="collectorsView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3">Collectors</h3>
@@ -77,6 +111,38 @@
       </div>
     </div>
   </div>
+
+  <script>
+    function switchTab(tabName) {
+      const views = document.querySelectorAll('.tab-content-view');
+      views.forEach(v => v.classList.add('d-none'));
+
+      const links = document.querySelectorAll('#mainTabs .nav-link');
+      links.forEach(l => l.classList.remove('active'));
+
+      if (tabName === 'raseed') {
+        document.getElementById('raseedView').classList.remove('d-none');
+      } else if (tabName === 'history') {
+        document.getElementById('historyView').classList.remove('d-none');
+      } else if (tabName === 'reports') {
+        document.getElementById('reportsView').classList.remove('d-none');
+      } else if (tabName === 'collectors') {
+        document.getElementById('collectorsView').classList.remove('d-none');
+      }
+      
+      event.target.classList.add('active');
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value;
+      const p = document.getElementById('loginPassword').value;
+      if(u && p) {
+        document.getElementById('loginSection').classList.add('d-none');
+        document.getElementById('mainSection').classList.remove('d-none');
+      }
+    });
+  </script>
 
 </body>
 </html>
