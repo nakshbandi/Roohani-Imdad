@@ -1,0 +1,22 @@
+{
+  "project_info": {
+    "project_number": "123456789012",
+    "project_id": "roohani-imdad",
+    "storage_bucket": "roohani-imdad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:abcdef12345678",
+        "android_client_id": "android:com.roohaniimdad.eraseed"
+      },
+      "oauth_client": [],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
