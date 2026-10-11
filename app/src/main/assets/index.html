@@ -1,359 +1,163 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roohani Imdad E-Raseed</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
-    :root{--green:#007a4d;--dark:#00613d}
-    body{background:#f4f6f9;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
-    .app-header{background:var(--green);color:white;padding:18px 12px;border-radius:0 0 15px 15px}
-    .card-custom{border:0;border-radius:14px;box-shadow:0 4px 14px #0000000d}
-    .btn-emerald{background:var(--green);border-color:var(--green);color:white}
-    .btn-emerald:hover,.btn-emerald:focus{background:var(--dark);border-color:var(--dark);color:white}
-    .nav-pills .nav-link.active{background:var(--green)}
-    .small-muted{color:#65716d;font-size:.93rem}
-    #statusBox{white-space:pre-wrap}
+    body { 
+      background-color: #f0f4f2; 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+    }
+    .app-header { 
+      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
+      color: white; 
+      padding: 20px 15px; 
+      border-radius: 0 0 20px 20px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    }
+    .card-custom { 
+      border: none;
+      border-radius: 16px; 
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
+      background: #ffffff;
+    }
+    .btn-emerald { 
+      background: linear-gradient(135deg, #008751 0%, #006838 100%); 
+      color: white; 
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-emerald:hover { 
+      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
+      color: white; 
+      box-shadow: 0 4px 12px rgba(0,135,81,0.3);
+    }
+    .form-control {
+      border-radius: 10px;
+      padding: 11px 14px;
+      border: 1px solid #dcdfe3;
+    }
+    .form-control:focus {
+      border-color: #008751;
+      box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.2);
+    }
+    .nav-pills .nav-link.active {
+      background-color: #008751 !important;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .nav-pills .nav-link {
+      color: #006838;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
-<header class="app-header text-center mb-3">
-  <h3 class="fw-bold m-0">Roohani Imdad E-Raseed</h3>
-  <div>Secure Online Donation • Receipt • Reports</div>
-</header>
 
-<main class="container pb-5">
-  <div id="statusBox" class="alert d-none" role="status"></div>
+  <div class="app-header text-center mb-4">
+    <h3 class="fw-bold m-0" style="letter-spacing: 0.5px;">Roohani Imdad E-Raseed</h3>
+    <small style="opacity: 0.9;">Secure Online Donation • Receipt • Reports</small>
+  </div>
 
-  <section id="loginSection" class="card card-custom p-4 mx-auto" style="max-width:440px">
-    <h4 class="fw-bold mb-3">Secure Login</h4>
-    <form id="loginForm">
-      <div class="mb-3">
-        <label for="loginUsername" class="form-label fw-semibold">Username</label>
-        <input id="loginUsername" class="form-control" autocomplete="username" maxlength="40" required>
-      </div>
-      <div class="mb-3">
-        <label for="loginPassword" class="form-label fw-semibold">Password</label>
-        <input id="loginPassword" type="password" class="form-control" autocomplete="current-password" required>
-      </div>
-      <button id="loginButton" class="btn btn-emerald w-100 fw-bold py-2" type="submit">Login</button>
-    </form>
-  </section>
-
-  <section id="mainSection" class="d-none">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-      <div><strong id="welcomeName"></strong><div id="roleLabel" class="small-muted"></div></div>
-      <button id="logoutButton" class="btn btn-outline-secondary btn-sm">Logout</button>
-    </div>
-    <ul class="nav nav-pills nav-fill mb-3 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
-      <li class="nav-item"><button class="nav-link active w-100" data-tab="raseed">New Raseed</button></li>
-      <li class="nav-item"><button class="nav-link w-100" data-tab="history">History</button></li>
-      <li class="nav-item"><button class="nav-link w-100" data-tab="reports">Reports</button></li>
-      <li class="nav-item" id="collectorsTabNav"><button class="nav-link w-100" data-tab="collectors">Collectors</button></li>
-    </ul>
-
-    <section id="raseedView" class="tab-content-view">
-      <h4 class="fw-bold mb-3">New Raseed</h4>
-      <div class="card card-custom p-4">
-        <form id="raseedForm">
-          <div class="mb-3"><label class="form-label fw-semibold" for="donorName">Donor Name *</label><input id="donorName" class="form-control" maxlength="120" required></div>
-          <div class="mb-3"><label class="form-label fw-semibold" for="donorAmount">Amount (₹) *</label><input id="donorAmount" type="number" class="form-control" min="1" step="0.01" required></div>
-          <div class="mb-3"><label class="form-label fw-semibold" for="donorNote">Purpose / Note (optional)</label><input id="donorNote" class="form-control" maxlength="250"></div>
-          <button id="raseedButton" type="submit" class="btn btn-emerald w-100 fw-bold py-2">Submit Raseed</button>
-        </form>
-      </div>
-    </section>
-
-    <section id="historyView" class="tab-content-view d-none">
-      <div class="d-flex justify-content-between align-items-center mb-3"><h4 class="fw-bold m-0">History</h4><button id="refreshHistory" class="btn btn-outline-success btn-sm">Refresh</button></div>
-      <div id="historyList" class="card card-custom p-3"><p class="text-muted m-0">Loading records…</p></div>
-    </section>
-
-    <section id="reportsView" class="tab-content-view d-none">
-      <h4 class="fw-bold mb-3">Reports</h4>
-      <div class="card card-custom p-4">
-        <div class="row g-3">
-          <div class="col-6"><div class="small-muted">Total receipts</div><div id="reportCount" class="fs-3 fw-bold">—</div></div>
-          <div class="col-6"><div class="small-muted">Total amount</div><div id="reportAmount" class="fs-3 fw-bold">—</div></div>
+  <div class="container pb-5" id="appContent">
+    <!-- Login View -->
+    <div id="loginSection" class="card card-custom p-4 mx-auto" style="max-width: 400px;">
+      <h4 class="fw-bold mb-3 text-center" style="color: #006838;">Secure Login</h4>
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Username</label>
+          <input type="text" id="loginUsername" class="form-control" placeholder="Username" required>
         </div>
-        <p class="small-muted mt-3 mb-0">Totals are based on records available to your account.</p>
-        <button id="refreshReports" class="btn btn-outline-success mt-3">Refresh reports</button>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-emerald w-100 py-2 mt-2">Login</button>
+      </form>
+    </div>
+
+    <!-- Main Navigation View (Hidden by default until login) -->
+    <div id="mainSection" class="d-none">
+      <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed')">New Raseed</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('history')">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('reports')">Reports</a></li>
+      </ul>
+
+      <!-- Raseed View -->
+      <div id="raseedView" class="tab-content-view">
+        <h3 class="fw-bold mb-3" style="color: #006838;">New Raseed</h3>
+        <div class="card card-custom p-4">
+          <form id="raseedForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Donor Name</label>
+              <input type="text" id="donorName" class="form-control" placeholder="Full name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₹)</label>
+              <input type="number" id="donorAmount" class="form-control" placeholder="Enter amount" required>
+            </div>
+            <button type="submit" class="btn btn-emerald w-100 py-2">Submit Raseed</button>
+          </form>
+        </div>
       </div>
-    </section>
 
-    <section id="collectorsView" class="tab-content-view d-none">
-      <h4 class="fw-bold mb-3">Collectors</h4>
-      <div class="card card-custom p-4 mb-3">
-        <h5 class="fw-bold mb-3">Add Collector</h5>
-        <form id="addCollectorForm">
-          <div class="mb-3"><label class="form-label fw-semibold" for="collectorName">Collector Name *</label><input id="collectorName" class="form-control" maxlength="120" required></div>
-          <div class="mb-3"><label class="form-label fw-semibold" for="collectorUsername">Username *</label><input id="collectorUsername" class="form-control" autocomplete="off" pattern="[A-Za-z0-9._-]{3,40}" title="Use 3–40 letters, numbers, dots, underscores or hyphens" required></div>
-          <div class="mb-3"><label class="form-label fw-semibold" for="collectorPassword">Password (minimum 8 characters) *</label><input id="collectorPassword" type="password" class="form-control" minlength="8" autocomplete="new-password" required></div>
-          <div class="mb-3"><label class="form-label fw-semibold" for="collectorConfirmPassword">Confirm Password *</label><input id="collectorConfirmPassword" type="password" class="form-control" minlength="8" autocomplete="new-password" required></div>
-          <button id="addCollectorButton" type="submit" class="btn btn-emerald w-100 fw-bold py-2">Add Collector</button>
-        </form>
+      <!-- History View -->
+      <div id="historyView" class="tab-content-view d-none">
+        <h3 class="fw-bold mb-3" style="color: #006838;">History</h3>
+        <div id="historyList" class="card card-custom p-4 text-center">
+          <p class="text-muted m-0">No records found.</p>
+        </div>
       </div>
-      <div class="card card-custom p-3">
-        <div class="d-flex justify-content-between align-items-center"><h5 class="fw-bold mb-0">Registered Collectors</h5><button id="refreshCollectors" class="btn btn-outline-success btn-sm">Refresh</button></div>
-        <div id="collectorList" class="mt-3">Loading…</div>
+
+      <!-- Reports View -->
+      <div id="reportsView" class="tab-content-view d-none">
+        <h3 class="fw-bold mb-3" style="color: #006838;">Reports</h3>
+        <div class="card card-custom p-4 text-center">
+          <p class="text-muted m-0">Reports data loading...</p>
+        </div>
       </div>
-    </section>
-  </section>
-</main>
+    </div>
+  </div>
 
-<script>
-/*
-IMPORTANT SETUP:
-Firebase Console > Project settings > General > Your apps > Web app.
-Paste the WEB app config values below. Do not use an Android appId as the web appId.
-*/
-const firebaseConfig = {
-  apiKey: "AIzaSyBLxKqYKgdJfNTg2tjoe4tdPjZ41HQlRH0",
-  authDomain: "roohani-imdad.firebaseapp.com",
-  projectId: "roohani-imdad",
-  storageBucket: "roohani-imdad.firebasestorage.app",
-  messagingSenderId: "308625492257",
-  appId: "1:308625492257:web:e6704488b8ee51198c9660"
-};
+  <script>
+    function switchTab(tabName) {
+      const views = document.querySelectorAll('.tab-content-view');
+      views.forEach(v => v.classList.add('d-none'));
 
-let app, auth, db, secondaryApp, secondaryAuth, currentUser = null, currentProfile = null;
-const $ = id => document.getElementById(id);
-const normalizedUsername = value => value.trim().toLowerCase();
-const syntheticEmail = username => `${normalizedUsername(username)}@login.roohani-imdad.app`;
+      const links = document.querySelectorAll('#mainTabs .nav-link');
+      links.forEach(l => l.classList.remove('active'));
 
-function showStatus(message, type='info') {
-  const box = $('statusBox');
-  box.className = `alert alert-${type}`;
-  box.textContent = message;
-  box.classList.remove('d-none');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function clearStatus(){ $('statusBox').classList.add('d-none'); }
-function friendlyError(error) {
-  const code = error && error.code ? error.code : '';
-  const messages = {
-    'auth/invalid-credential':'Username ya password galat hai.',
-    'auth/wrong-password':'Username ya password galat hai.',
-    'auth/user-not-found':'Username ya password galat hai.',
-    'auth/invalid-email':'Firebase Web App config ya username format check karein.',
-    'auth/email-already-in-use':'Yeh username pehle se registered hai.',
-    'auth/weak-password':'Password kam se kam 8 characters ka rakhein.',
-    'auth/too-many-requests':'Bahut koshishen hui hain. Thodi der baad dobara try karein.',
-    'permission-denied':'Firebase Firestore Rules/permissions check karein.',
-    'auth/network-request-failed':'Internet connection check karein.'
-  };
-  return messages[code] || `${error.message || 'Unknown error'}${code ? ` (${code})` : ''}`;
-}
-function validateFirebaseConfig() {
-  return firebaseConfig.apiKey.startsWith('AIza') &&
-    !Object.values(firebaseConfig).some(v => String(v).includes('PASTE_'));
-}
-function setBusy(button, busy, text) {
-  button.disabled = busy;
-  if (busy) { button.dataset.oldText = button.textContent; button.textContent = text || 'Please wait…'; }
-  else if (button.dataset.oldText) { button.textContent = button.dataset.oldText; delete button.dataset.oldText; }
-}
+      if (tabName === 'raseed') {
+        document.getElementById('raseedView').classList.remove('d-none');
+      } else if (tabName === 'history') {
+        document.getElementById('historyView').classList.remove('d-none');
+      } else if (tabName === 'reports') {
+        document.getElementById('reportsView').classList.remove('d-none');
+      }
+      
+      if(event && event.target) {
+        event.target.classList.add('active');
+      }
+    }
 
-function switchTab(tabName) {
-  if (tabName === 'collectors' && currentProfile?.role !== 'admin') {
-    showStatus('Sirf Admin collector accounts manage kar sakta hai.', 'warning'); return;
-  }
-  document.querySelectorAll('.tab-content-view').forEach(v => v.classList.add('d-none'));
-  document.querySelectorAll('#mainTabs .nav-link').forEach(b => b.classList.remove('active'));
-  $(`${tabName}View`).classList.remove('d-none');
-  document.querySelector(`#mainTabs [data-tab="${tabName}"]`).classList.add('active');
-  if (tabName === 'history') loadHistory();
-  if (tabName === 'reports') loadReports();
-  if (tabName === 'collectors' && currentProfile?.role === 'admin') loadCollectors();
-}
-document.querySelectorAll('#mainTabs [data-tab]').forEach(button =>
-  button.addEventListener('click', () => switchTab(button.dataset.tab))
-);
-
-async function login(username, password) {
-  const normalized = normalizedUsername(username);
-  if (!/^[a-z0-9._-]{3,40}$/.test(normalized)) throw new Error('Username 3–40 characters ka ho: letters, numbers, dot, underscore ya hyphen.');
-  // Only a single document lookup is allowed for the username mapping by the Firestore rules below.
-  const mapping = await db.collection('usernames').doc(normalized).get();
-  if (!mapping.exists) throw new Error('Username ya password galat hai.');
-  const credential = await auth.signInWithEmailAndPassword(syntheticEmail(normalized), password);
-  const profileSnap = await db.collection('users').doc(credential.user.uid).get();
-  if (!profileSnap.exists || !['admin','collector'].includes(profileSnap.data().role)) {
-    await auth.signOut();
-    throw new Error('Account profile/role missing hai. Admin se Firebase setup check karwayein.');
-  }
-  currentUser = credential.user;
-  currentProfile = profileSnap.data();
-  $('loginSection').classList.add('d-none');
-  $('mainSection').classList.remove('d-none');
-  $('welcomeName').textContent = currentProfile.name || normalized;
-  $('roleLabel').textContent = currentProfile.role === 'admin' ? 'Administrator' : 'Collector';
-  $('collectorsTabNav').classList.toggle('d-none', currentProfile.role !== 'admin');
-  clearStatus();
-  switchTab('raseed');
-}
-
-$('loginForm').addEventListener('submit', async e => {
-  e.preventDefault(); clearStatus();
-  const button = $('loginButton'); setBusy(button,true,'Signing in…');
-  try { await login($('loginUsername').value, $('loginPassword').value); }
-  catch (error) { showStatus(friendlyError(error), 'danger'); }
-  finally { setBusy(button,false); }
-});
-
-$('logoutButton').addEventListener('click', async () => {
-  try { await auth.signOut(); } catch(e) { showStatus(friendlyError(e),'danger'); }
-});
-authStateSetup();
-
-function authStateSetup() {
-  // Firebase is initialized after the config check below.
-}
-
-async function handleAuthState(user) {
-  if (!user) {
-    currentUser = null; currentProfile = null;
-    $('mainSection').classList.add('d-none');
-    $('loginSection').classList.remove('d-none');
-    return;
-  }
-  try {
-    const snap = await db.collection('users').doc(user.uid).get();
-    if (!snap.exists) { await auth.signOut(); showStatus('Is account ka role profile nahi mila. Admin se sampark karein.','danger'); return; }
-    currentUser = user; currentProfile = snap.data();
-    $('loginSection').classList.add('d-none'); $('mainSection').classList.remove('d-none');
-    $('welcomeName').textContent = currentProfile.name || currentProfile.username || 'User';
-    $('roleLabel').textContent = currentProfile.role === 'admin' ? 'Administrator' : 'Collector';
-    $('collectorsTabNav').classList.toggle('d-none', currentProfile.role !== 'admin');
-    switchTab('raseed');
-  } catch (e) { showStatus(friendlyError(e),'danger'); }
-}
-
-$('addCollectorForm').addEventListener('submit', async e => {
-  e.preventDefault(); clearStatus();
-  if (currentProfile?.role !== 'admin') { showStatus('Sirf Admin collector bana sakta hai.','danger'); return; }
-  const name = $('collectorName').value.trim();
-  const username = normalizedUsername($('collectorUsername').value);
-  const password = $('collectorPassword').value;
-  const confirm = $('collectorConfirmPassword').value;
-  if (!/^[a-z0-9._-]{3,40}$/.test(username)) { showStatus('Username 3–40 characters ka ho aur sirf letters, numbers, dot, underscore, hyphen use karein.','warning'); return; }
-  if (password.length < 8) { showStatus('Password kam se kam 8 characters ka hona chahiye.','warning'); return; }
-  if (password !== confirm) { showStatus('Dono passwords match nahi karte.','warning'); return; }
-  const button = $('addCollectorButton'); setBusy(button,true,'Creating collector…');
-  let newUser = null;
-  try {
-    const existing = await db.collection('usernames').doc(username).get();
-    if (existing.exists) throw new Error('Yeh username pehle se maujood hai.');
-    // Use a SECOND Firebase app so creating a collector does not log the Admin out.
-    const credential = await secondaryAuth.createUserWithEmailAndPassword(syntheticEmail(username), password);
-    newUser = credential.user;
-    await db.collection('users').doc(newUser.uid).set({
-      uid: newUser.uid, name, username, role: 'collector',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      createdBy: currentUser.uid
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value;
+      const p = document.getElementById('loginPassword').value;
+      if(u && p) {
+        document.getElementById('loginSection').classList.add('d-none');
+        document.getElementById('mainSection').classList.remove('d-none');
+      }
     });
-    await db.collection('usernames').doc(username).set({
-      uid: newUser.uid,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    await secondaryAuth.signOut();
-    $('addCollectorForm').reset();
-    showStatus(`Collector "${name}" (${username}) create ho gaya. Ab woh username aur password se login kar sakta hai.`, 'success');
-    await loadCollectors();
-  } catch (error) {
-    if (secondaryAuth.currentUser) { try { await secondaryAuth.signOut(); } catch (_) {} }
-    showStatus(friendlyError(error), 'danger');
-  } finally { setBusy(button,false); }
-});
+  </script>
 
-$('raseedForm').addEventListener('submit', async e => {
-  e.preventDefault(); clearStatus();
-  if (!currentUser || !currentProfile) { showStatus('Pehle login karein.','warning'); return; }
-  const name = $('donorName').value.trim();
-  const amount = Number($('donorAmount').value);
-  const note = $('donorNote').value.trim();
-  if (!name || !Number.isFinite(amount) || amount <= 0) { showStatus('Donor name aur valid amount bharna zaroori hai.','warning'); return; }
-  const button = $('raseedButton'); setBusy(button,true,'Saving receipt…');
-  try {
-    const ref = await db.collection('receipts').add({
-      donorName: name, amount, note,
-      collectorUid: currentUser.uid,
-      collectorName: currentProfile.name || currentProfile.username || '',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    $('raseedForm').reset();
-    showStatus(`Raseed save ho gayi. Receipt ID: ${ref.id}`, 'success');
-  } catch (error) { showStatus(friendlyError(error),'danger'); }
-  finally { setBusy(button,false); }
-});
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function formatDate(timestamp) {
-  if (!timestamp || !timestamp.toDate) return 'Just now';
-  return timestamp.toDate().toLocaleString();
-}
-async function getReceiptQuery() {
-  let query = db.collection('receipts').orderBy('createdAt','desc').limit(200);
-  if (currentProfile?.role !== 'admin') query = query.where('collectorUid','==',currentUser.uid).orderBy('createdAt','desc').limit(200);
-  return query.get();
-}
-async function loadHistory() {
-  $('historyList').textContent = 'Loading records…';
-  try {
-    const snap = await getReceiptQuery();
-    if (snap.empty) { $('historyList').innerHTML = '<p class="text-muted text-center m-0">No records found.</p>'; return; }
-    $('historyList').innerHTML = snap.docs.map(doc => {
-      const r = doc.data();
-      return `<div class="border-bottom py-3"><div class="d-flex justify-content-between gap-2"><strong>${escapeHtml(r.donorName)}</strong><strong>₹${Number(r.amount || 0).toLocaleString('en-IN',{maximumFractionDigits:2})}</strong></div><div class="small-muted">${escapeHtml(formatDate(r.createdAt))} · ${escapeHtml(r.collectorName || '')}</div>${r.note ? `<div>${escapeHtml(r.note)}</div>`:''}<div class="small text-muted">Receipt: ${escapeHtml(doc.id)}</div></div>`;
-    }).join('');
-  } catch (e) { $('historyList').textContent = friendlyError(e); }
-}
-async function loadReports() {
-  $('reportCount').textContent = '…'; $('reportAmount').textContent = '…';
-  try {
-    const snap = await getReceiptQuery();
-    let total = 0; snap.forEach(doc => total += Number(doc.data().amount || 0));
-    $('reportCount').textContent = String(snap.size);
-    $('reportAmount').textContent = '₹' + total.toLocaleString('en-IN',{maximumFractionDigits:2});
-  } catch(e) { $('reportCount').textContent = 'Error'; $('reportAmount').textContent = friendlyError(e); }
-}
-async function loadCollectors() {
-  if (currentProfile?.role !== 'admin') return;
-  $('collectorList').textContent = 'Loading…';
-  try {
-    const snap = await db.collection('users').where('role','==','collector').orderBy('name').get();
-    if (snap.empty) { $('collectorList').textContent = 'Abhi koi collector nahi hai.'; return; }
-    $('collectorList').innerHTML = snap.docs.map(d => `<div class="border-bottom py-2"><strong>${escapeHtml(d.data().name || '')}</strong><div class="small-muted">Username: ${escapeHtml(d.data().username || '')}</div></div>`).join('');
-  } catch(e) { $('collectorList').textContent = friendlyError(e); }
-}
-$('refreshHistory').addEventListener('click', loadHistory);
-$('refreshReports').addEventListener('click', loadReports);
-$('refreshCollectors').addEventListener('click', loadCollectors);
-
-(function initializeFirebase() {
-  if (!validateFirebaseConfig()) {
-    showStatus('Setup required: index.html mein Firebase Console se WEB app config paste karein. Is config ke bina login/collector creation kaam nahi karega.','warning');
-    $('loginButton').disabled = true;
-    return;
-  }
-  try {
-    app = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    secondaryApp = firebase.initializeApp(firebaseConfig, 'collectorCreator');
-    secondaryAuth = secondaryApp.auth();
-    auth.onAuthStateChanged(handleAuthState);
-  } catch (e) {
-    showStatus('Firebase initialize nahi hua: ' + friendlyError(e), 'danger');
-  }
-})();
-</script>
 </body>
-  </html>
-  
+</html>
