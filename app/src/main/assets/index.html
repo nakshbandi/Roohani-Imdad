@@ -9,54 +9,15 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <style>
-    body { 
-      background-color: #f0f4f2; 
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-    }
-    .app-header { 
-      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
-      color: white; 
-      padding: 20px 15px; 
-      border-radius: 0 0 20px 20px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    }
-    .card-custom { 
-      border: none;
-      border-radius: 16px; 
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06); 
-      background: #ffffff;
-    }
-    .btn-emerald { 
-      background: linear-gradient(135deg, #008751 0%, #006838 100%); 
-      color: white; 
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    .btn-emerald:hover { 
-      background: linear-gradient(135deg, #006838 0%, #004d28 100%); 
-      color: white; 
-      box-shadow: 0 4px 12px rgba(0,135,81,0.3);
-    }
-    .form-control {
-      border-radius: 10px;
-      padding: 11px 14px;
-      border: 1px solid #dcdfe3;
-    }
-    .form-control:focus {
-      border-color: #008751;
-      box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.2);
-    }
-    .nav-pills .nav-link.active {
-      background-color: #008751 !important;
-      border-radius: 10px;
-      font-weight: 600;
-    }
-    .nav-pills .nav-link {
-      color: #006838;
-      font-weight: 600;
-    }
+    body { background-color: #f0f4f2; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .app-header { background: linear-gradient(135deg, #006838 0%, #004d28 100%); color: white; padding: 20px 15px; border-radius: 0 0 20px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.12); }
+    .card-custom { border: none; border-radius: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); background: #ffffff; }
+    .btn-emerald { background: linear-gradient(135deg, #008751 0%, #006838 100%); color: white; border: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease; }
+    .btn-emerald:hover { background: linear-gradient(135deg, #006838 0%, #004d28 100%); color: white; box-shadow: 0 4px 12px rgba(0,135,81,0.3); }
+    .form-control, .form-select { border-radius: 10px; padding: 11px 14px; border: 1px solid #dcdfe3; }
+    .form-control:focus, .form-select:focus { border-color: #008751; box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.2); }
+    .nav-pills .nav-link.active { background-color: #008751 !important; border-radius: 10px; font-weight: 600; }
+    .nav-pills .nav-link { color: #006838; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -83,28 +44,57 @@
       </form>
     </div>
 
-    <!-- Main Navigation View (Hidden by default until login) -->
+    <!-- Main Navigation View -->
     <div id="mainSection" class="d-none">
       <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
-        <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed')">New Raseed</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('history')">History</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('reports')">Reports</a></li>
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed', event)">New Raseed</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('history', event)">History</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('reports', event)">Reports</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('settings', event)">Settings</a></li>
+        <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()">Logout</a></li>
       </ul>
 
-      <!-- Raseed View -->
+      <!-- New Donation Raseed View -->
       <div id="raseedView" class="tab-content-view">
-        <h3 class="fw-bold mb-3" style="color: #006838;">New Raseed</h3>
+        <h3 class="fw-bold mb-3" style="color: #006838;">New Donation Raseed</h3>
         <div class="card card-custom p-4">
           <form id="raseedForm">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Donor Name</label>
+              <label class="form-label fw-semibold">Donor Name *</label>
               <input type="text" id="donorName" class="form-control" placeholder="Full name" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Amount (₹)</label>
-              <input type="number" id="donorAmount" class="form-control" placeholder="Enter amount" required>
+              <label class="form-label fw-semibold">Mobile</label>
+              <input type="text" id="donorMobile" class="form-control" placeholder="Mobile number">
             </div>
-            <button type="submit" class="btn btn-emerald w-100 py-2">Submit Raseed</button>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Amount (₹) *</label>
+              <input type="number" id="donorAmount" class="form-control" placeholder="Amount" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Donation Type</label>
+              <select id="donationType" class="form-select">
+                <option value="Zakat">Zakat</option>
+                <option value="Lillah">Lillah</option>
+                <option value="Sadqa">Sadqa</option>
+                <option value="General Imdad">General Imdad</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Payment Mode</label>
+              <select id="paymentMode" class="form-select">
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Note</label>
+              <textarea id="donorNote" class="form-control" placeholder="Optional notes" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-emerald w-100 py-2 fw-bold">Generate Raseed</button>
           </form>
         </div>
       </div>
@@ -124,11 +114,19 @@
           <p class="text-muted m-0">Reports data loading...</p>
         </div>
       </div>
+
+      <!-- Settings View -->
+      <div id="settingsView" class="tab-content-view d-none">
+        <h3 class="fw-bold mb-3" style="color: #006838;">Settings</h3>
+        <div class="card card-custom p-4">
+          <p class="text-muted m-0">App Settings & Configuration.</p>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    function switchTab(tabName) {
+    function switchTab(tabName, event) {
       const views = document.querySelectorAll('.tab-content-view');
       views.forEach(v => v.classList.add('d-none'));
 
@@ -141,23 +139,26 @@
         document.getElementById('historyView').classList.remove('d-none');
       } else if (tabName === 'reports') {
         document.getElementById('reportsView').classList.remove('d-none');
+      } else if (tabName === 'settings') {
+        document.getElementById('settingsView').classList.remove('d-none');
       }
       
-      if(event && event.target) {
+      if (event && event.target) {
         event.target.classList.add('active');
       }
     }
 
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const u = document.getElementById('loginUsername').value;
-      const p = document.getElementById('loginPassword').value;
-      if(u && p) {
-        document.getElementById('loginSection').classList.add('d-none');
-        document.getElementById('mainSection').classList.remove('d-none');
-      }
+      document.getElementById('loginSection').classList.add('d-none');
+      document.getElementById('mainSection').classList.remove('d-none');
     });
+
+    function logout() {
+      document.getElementById('mainSection').classList.add('d-none');
+      document.getElementById('loginSection').classList.remove('d-none');
+    }
   </script>
 
 </body>
-</html>
+  </html>
