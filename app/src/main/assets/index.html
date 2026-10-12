@@ -31,7 +31,6 @@
 
   <div class="app-header text-center mb-4">
     <div class="d-flex align-items-center justify-content-center gap-2">
-      <img src="logo.png" id="appLogo" alt="Logo" style="height: 45px; width: auto;" onerror="this.style.display='none'">
       <h3 class="fw-bold m-0" style="letter-spacing: 0.5px;">Roohani Imdad E-Raseed</h3>
     </div>
     <small style="opacity: 0.9;">Secure Online Donation • Receipt • Reports</small>
@@ -117,10 +116,7 @@
       <!-- Generated Receipt View -->
       <div id="receiptResultView" class="tab-content-view d-none">
         <div class="card card-custom p-4 text-center mb-3" id="printableReceipt">
-          <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
-            <img src="logo.png" style="height: 35px; width: auto;" onerror="this.style.display='none'">
-            <h4 class="fw-bold text-success m-0">Roohani Imdad E-Raseed</h4>
-          </div>
+          <h4 class="fw-bold text-success m-0 mb-1">Roohani Imdad E-Raseed</h4>
           <p class="text-muted small mb-3">Donation Receipt</p>
           <hr>
           <div class="text-start px-3 mb-3">
@@ -134,7 +130,7 @@
             <p class="mb-1"><strong>Note:</strong> <span id="rNote"></span></p>
           </div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
           <button class="btn btn-emerald flex-fill py-2" onclick="window.print()">Print Receipt</button>
           <button class="btn btn-success flex-fill py-2" onclick="shareWhatsApp()">Share WhatsApp</button>
           <button class="btn btn-secondary flex-fill py-2" onclick="switchTab('raseed', event)">New Entry</button>
@@ -235,9 +231,14 @@
       const mobile = document.getElementById('rMobile').innerText.trim();
       const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
       
-      // Standard HTTP URL to prevent WebView 'ERR_UNKNOWN_URL_SCHEME'
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Receipt text copied to clipboard! Opening WhatsApp...');
+        }).catch(err => {});
+      }
+      
       const waUrl = `https://api.whatsapp.com/send?phone=${encodeURIComponent(mobile)}&text=${encodeURIComponent(text)}`;
-      window.open(waUrl, '_blank');
+      window.location.href = waUrl;
     }
 
     function handleLogout(e) {
@@ -252,4 +253,4 @@
     });
   </script>
 </body>
-            </html>
+  </html>
