@@ -232,8 +232,10 @@
       const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
       
       // Standard HTTP URL for WhatsApp to completely avoid ERR_UNKNOWN_URL_SCHEME in Android WebViews
-      const waUrl = `https://api.whatsapp.com/send?phone=${encodeURIComponent(mobile)}&text=${encodeURIComponent(text)}`;
-      window.location.href = waUrl;
+     const digits = mobile.replace(/\D/g, '');
+const phone = digits.length === 10 ? '91' + digits : digits;
+const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+window.open(waUrl, '_blank'); 
     }
 
     function handleLogout(e) {
