@@ -231,12 +231,7 @@
       const mobile = document.getElementById('rMobile').innerText.trim();
       const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
       
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => {
-          alert('Receipt text copied to clipboard! Opening WhatsApp...');
-        }).catch(err => {});
-      }
-      
+      // Standard HTTP URL for WhatsApp to completely avoid ERR_UNKNOWN_URL_SCHEME in Android WebViews
       const waUrl = `https://api.whatsapp.com/send?phone=${encodeURIComponent(mobile)}&text=${encodeURIComponent(text)}`;
       window.location.href = waUrl;
     }
@@ -253,4 +248,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
