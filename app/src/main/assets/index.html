@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roohani Imdad E-Raseed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -18,6 +19,7 @@
     .form-control:focus, .form-select:focus { border-color: #008751; box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.2); }
     .nav-pills .nav-link.active { background-color: #008751 !important; border-radius: 10px; font-weight: 600; }
     .nav-pills .nav-link { color: #006838; font-weight: 600; }
+    #qrcode img { margin: auto; display: block; }
     @media print {
       body * { visibility: hidden; }
       #printableReceipt, #printableReceipt * { visibility: visible; }
@@ -28,7 +30,10 @@
 <body>
 
   <div class="app-header text-center mb-4">
-    <h3 class="fw-bold m-0" style="letter-spacing: 0.5px;">Roohani Imdad E-Raseed</h3>
+    <div class="d-flex align-items-center justify-content-center gap-2">
+      <img src="logo.png" id="appLogo" alt="Logo" style="height: 45px; width: auto;" onerror="this.style.display='none'">
+      <h3 class="fw-bold m-0" style="letter-spacing: 0.5px;">Roohani Imdad E-Raseed</h3>
+    </div>
     <small style="opacity: 0.9;">Secure Online Donation • Receipt • Reports</small>
   </div>
 
@@ -50,7 +55,7 @@
       </form>
     </div>
 
-    <!-- Main Section (Hidden initially) -->
+    <!-- Main Section -->
     <div id="mainSection" class="d-none">
       <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
         <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed', event)">New Raseed</a></li>
@@ -60,7 +65,7 @@
         <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="handleLogout(event)">Logout</a></li>
       </ul>
 
-      <!-- New Raseed Tab -->
+      <!-- New Donation Raseed View -->
       <div id="raseedView" class="tab-content-view">
         <h3 class="fw-bold mb-3" style="color: #006838;">New Donation Raseed</h3>
         <div class="card card-custom p-4">
@@ -75,7 +80,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Amount (₹) *</label>
-              <input type="number" id="donorAmount" class="form-control" placeholder="Amount" required>
+              <input type="number" id="donorAmount" class="form-control" placeholder="Amount" oninput="generateDynamicQR()" required>
             </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Donation Type</label>
@@ -96,6 +101,10 @@
                 <option value="Other">Other</option>
               </select>
             </div>
+            <div class="mb-3 text-center">
+              <label class="form-label fw-semibold d-block">UPI Payment QR</label>
+              <div id="qrcode" class="p-2 border rounded bg-light d-inline-block"></div>
+            </div>
             <div class="mb-3">
               <label class="form-label fw-semibold">Note</label>
               <textarea id="donorNote" class="form-control" placeholder="Optional notes" rows="2"></textarea>
@@ -105,10 +114,13 @@
         </div>
       </div>
 
-      <!-- Generated Receipt Result View (Print/Share) -->
+      <!-- Generated Receipt View -->
       <div id="receiptResultView" class="tab-content-view d-none">
         <div class="card card-custom p-4 text-center mb-3" id="printableReceipt">
-          <h4 class="fw-bold text-success mb-1">Roohani Imdad E-Raseed</h4>
+          <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+            <img src="logo.png" style="height: 35px; width: auto;" onerror="this.style.display='none'">
+            <h4 class="fw-bold text-success m-0">Roohani Imdad E-Raseed</h4>
+          </div>
           <p class="text-muted small mb-3">Donation Receipt</p>
           <hr>
           <div class="text-start px-3 mb-3">
@@ -133,7 +145,7 @@
       <div id="historyView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3" style="color: #006838;">History</h3>
         <div id="historyList" class="card card-custom p-3">
-          <p class="text-muted text-center m-0">Loading records...</p>
+          <p class="text-muted text-center m-0">No records available.</p>
         </div>
       </div>
 
@@ -141,7 +153,7 @@
       <div id="reportsView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3" style="color: #006838;">Reports</h3>
         <div id="reportsContainer" class="card card-custom p-4 text-center">
-          <p class="text-muted m-0">Loading reports...</p>
+          <p class="text-muted m-0">No reports generated yet.</p>
         </div>
       </div>
 
@@ -151,8 +163,8 @@
         <div class="card card-custom p-4">
           <form id="settingsForm">
             <div class="mb-3">
-              <label class="form-label fw-semibold">UPI ID for QR Code</label>
-              <input type="text" id="upiSetting" class="form-control" placeholder="e.g. example@upi">
+              <label class="form-label fw-semibold">UPI ID for Dynamic QR</label>
+              <input type="text" id="upiSetting" class="form-control" placeholder="e.g. name@upi" value="roohaniimdad@upi">
             </div>
             <button type="submit" class="btn btn-emerald w-100 py-2">Save Settings</button>
           </form>
@@ -163,36 +175,45 @@
   </div>
 
   <script>
-    // Tab Navigation Logic
-    function switchTab(tabName, event) {
-      const views = document.querySelectorAll('.tab-content-view');
-      views.forEach(v => v.classList.add('d-none'));
+    let qrCodeInstance = null;
 
-      const links = document.querySelectorAll('#mainTabs .nav-link');
-      links.forEach(l => l.classList.remove('active'));
+    function generateDynamicQR() {
+      const upiId = document.getElementById('upiSetting') ? document.getElementById('upiSetting').value : 'roohaniimdad@upi';
+      const amount = document.getElementById('donorAmount').value || '0';
+      const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=RoohaniImdad&am=${encodeURIComponent(amount)}&cu=INR`;
+      
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      qrCodeInstance = new QRCode(qrContainer, {
+        text: upiUrl,
+        width: 128,
+        height: 128
+      });
+    }
+
+    function switchTab(tabName, event) {
+      document.querySelectorAll('.tab-content-view').forEach(v => v.classList.add('d-none'));
+      document.querySelectorAll('#mainTabs .nav-link').forEach(l => l.classList.remove('active'));
 
       if (tabName === 'raseed') {
         document.getElementById('raseedView').classList.remove('d-none');
+        generateDynamicQR();
       } else if (tabName === 'history') {
         document.getElementById('historyView').classList.remove('d-none');
-        loadHistoryData();
       } else if (tabName === 'reports') {
         document.getElementById('reportsView').classList.remove('d-none');
-        loadReportsData();
       } else if (tabName === 'settings') {
         document.getElementById('settingsView').classList.remove('d-none');
       }
 
-      if (event && event.target) {
-        event.target.classList.add('active');
-      }
+      if (event && event.target) event.target.classList.add('active');
     }
 
-    // Temporary placeholder/fallback handlers for UI actions
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       document.getElementById('loginSection').classList.add('d-none');
       document.getElementById('mainSection').classList.remove('d-none');
+      generateDynamicQR();
     });
 
     document.getElementById('raseedForm').addEventListener('submit', function(e) {
@@ -211,23 +232,24 @@
     });
 
     function shareWhatsApp() {
+      const mobile = document.getElementById('rMobile').innerText.trim();
       const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
-      window.open(`https://wa.me/${document.getElementById('rMobile').innerText}?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function loadHistoryData() {
-      document.getElementById('historyList').innerHTML = '<p class="text-center text-muted m-0">History records synced with Firebase.</p>';
-    }
-
-    function loadReportsData() {
-      document.getElementById('reportsContainer').innerHTML = '<p class="text-center text-muted m-0">Reports synced with Firebase.</p>';
+      
+      // Standard HTTP URL to prevent WebView 'ERR_UNKNOWN_URL_SCHEME'
+      const waUrl = `https://api.whatsapp.com/send?phone=${encodeURIComponent(mobile)}&text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
     }
 
     function handleLogout(e) {
-      if(e) e.preventDefault();
+      if (e) e.preventDefault();
       document.getElementById('mainSection').classList.add('d-none');
       document.getElementById('loginSection').classList.remove('d-none');
     }
+
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Settings saved successfully!');
+    });
   </script>
 </body>
-</html>
+            </html>
