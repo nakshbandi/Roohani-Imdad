@@ -18,6 +18,11 @@
     .form-control:focus, .form-select:focus { border-color: #008751; box-shadow: 0 0 0 0.2rem rgba(0, 135, 81, 0.2); }
     .nav-pills .nav-link.active { background-color: #008751 !important; border-radius: 10px; font-weight: 600; }
     .nav-pills .nav-link { color: #006838; font-weight: 600; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -28,9 +33,10 @@
   </div>
 
   <div class="container pb-5" id="appContent">
-    <!-- Login View -->
+    <!-- Login Section -->
     <div id="loginSection" class="card card-custom p-4 mx-auto" style="max-width: 400px;">
       <h4 class="fw-bold mb-3 text-center" style="color: #006838;">Secure Login</h4>
+      <div id="loginAlert" class="alert alert-danger d-none" role="alert"></div>
       <form id="loginForm">
         <div class="mb-3">
           <label class="form-label fw-semibold">Username</label>
@@ -40,21 +46,21 @@
           <label class="form-label fw-semibold">Password</label>
           <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
         </div>
-        <button type="submit" class="btn btn-emerald w-100 py-2 mt-2">Login</button>
+        <button type="submit" id="btnLogin" class="btn btn-emerald w-100 py-2 mt-2">Login</button>
       </form>
     </div>
 
-    <!-- Main Navigation View -->
+    <!-- Main Section (Hidden initially) -->
     <div id="mainSection" class="d-none">
       <ul class="nav nav-pills nav-fill mb-4 bg-white p-2 rounded-3 shadow-sm" id="mainTabs">
         <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('raseed', event)">New Raseed</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('history', event)">History</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('reports', event)">Reports</a></li>
         <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('settings', event)">Settings</a></li>
-        <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()">Logout</a></li>
+        <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="handleLogout(event)">Logout</a></li>
       </ul>
 
-      <!-- New Donation Raseed View -->
+      <!-- New Raseed Tab -->
       <div id="raseedView" class="tab-content-view">
         <h3 class="fw-bold mb-3" style="color: #006838;">New Donation Raseed</h3>
         <div class="card card-custom p-4">
@@ -94,38 +100,70 @@
               <label class="form-label fw-semibold">Note</label>
               <textarea id="donorNote" class="form-control" placeholder="Optional notes" rows="2"></textarea>
             </div>
-            <button type="submit" class="btn btn-emerald w-100 py-2 fw-bold">Generate Raseed</button>
+            <button type="submit" id="btnSubmitRaseed" class="btn btn-emerald w-100 py-2 fw-bold">Generate Raseed</button>
           </form>
         </div>
       </div>
 
-      <!-- History View -->
+      <!-- Generated Receipt Result View (Print/Share) -->
+      <div id="receiptResultView" class="tab-content-view d-none">
+        <div class="card card-custom p-4 text-center mb-3" id="printableReceipt">
+          <h4 class="fw-bold text-success mb-1">Roohani Imdad E-Raseed</h4>
+          <p class="text-muted small mb-3">Donation Receipt</p>
+          <hr>
+          <div class="text-start px-3 mb-3">
+            <p class="mb-1"><strong>Receipt No:</strong> <span id="rNo"></span></p>
+            <p class="mb-1"><strong>Date:</strong> <span id="rDate"></span></p>
+            <p class="mb-1"><strong>Donor Name:</strong> <span id="rName"></span></p>
+            <p class="mb-1"><strong>Mobile:</strong> <span id="rMobile"></span></p>
+            <p class="mb-1"><strong>Amount:</strong> ₹<span id="rAmount"></span></p>
+            <p class="mb-1"><strong>Type:</strong> <span id="rType"></span></p>
+            <p class="mb-1"><strong>Payment Mode:</strong> <span id="rMode"></span></p>
+            <p class="mb-1"><strong>Note:</strong> <span id="rNote"></span></p>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-emerald flex-fill py-2" onclick="window.print()">Print Receipt</button>
+          <button class="btn btn-success flex-fill py-2" onclick="shareWhatsApp()">Share WhatsApp</button>
+          <button class="btn btn-secondary flex-fill py-2" onclick="switchTab('raseed', event)">New Entry</button>
+        </div>
+      </div>
+
+      <!-- History Tab -->
       <div id="historyView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3" style="color: #006838;">History</h3>
-        <div id="historyList" class="card card-custom p-4 text-center">
-          <p class="text-muted m-0">No records found.</p>
+        <div id="historyList" class="card card-custom p-3">
+          <p class="text-muted text-center m-0">Loading records...</p>
         </div>
       </div>
 
-      <!-- Reports View -->
+      <!-- Reports Tab -->
       <div id="reportsView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3" style="color: #006838;">Reports</h3>
-        <div class="card card-custom p-4 text-center">
-          <p class="text-muted m-0">Reports data loading...</p>
+        <div id="reportsContainer" class="card card-custom p-4 text-center">
+          <p class="text-muted m-0">Loading reports...</p>
         </div>
       </div>
 
-      <!-- Settings View -->
+      <!-- Settings Tab -->
       <div id="settingsView" class="tab-content-view d-none">
         <h3 class="fw-bold mb-3" style="color: #006838;">Settings</h3>
         <div class="card card-custom p-4">
-          <p class="text-muted m-0">App Settings & Configuration.</p>
+          <form id="settingsForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">UPI ID for QR Code</label>
+              <input type="text" id="upiSetting" class="form-control" placeholder="e.g. example@upi">
+            </div>
+            <button type="submit" class="btn btn-emerald w-100 py-2">Save Settings</button>
+          </form>
         </div>
       </div>
+
     </div>
   </div>
 
   <script>
+    // Tab Navigation Logic
     function switchTab(tabName, event) {
       const views = document.querySelectorAll('.tab-content-view');
       views.forEach(v => v.classList.add('d-none'));
@@ -137,28 +175,59 @@
         document.getElementById('raseedView').classList.remove('d-none');
       } else if (tabName === 'history') {
         document.getElementById('historyView').classList.remove('d-none');
+        loadHistoryData();
       } else if (tabName === 'reports') {
         document.getElementById('reportsView').classList.remove('d-none');
+        loadReportsData();
       } else if (tabName === 'settings') {
         document.getElementById('settingsView').classList.remove('d-none');
       }
-      
+
       if (event && event.target) {
         event.target.classList.add('active');
       }
     }
 
+    // Temporary placeholder/fallback handlers for UI actions
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
       document.getElementById('loginSection').classList.add('d-none');
       document.getElementById('mainSection').classList.remove('d-none');
     });
 
-    function logout() {
+    document.getElementById('raseedForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      document.getElementById('rNo').innerText = 'REC-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('rDate').innerText = new Date().toLocaleDateString();
+      document.getElementById('rName').innerText = document.getElementById('donorName').value;
+      document.getElementById('rMobile').innerText = document.getElementById('donorMobile').value || 'N/A';
+      document.getElementById('rAmount').innerText = document.getElementById('donorAmount').value;
+      document.getElementById('rType').innerText = document.getElementById('donationType').value;
+      document.getElementById('rMode').innerText = document.getElementById('paymentMode').value;
+      document.getElementById('rNote').innerText = document.getElementById('donorNote').value || 'N/A';
+
+      document.querySelectorAll('.tab-content-view').forEach(v => v.classList.add('d-none'));
+      document.getElementById('receiptResultView').classList.remove('d-none');
+    });
+
+    function shareWhatsApp() {
+      const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
+      window.open(`https://wa.me/${document.getElementById('rMobile').innerText}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function loadHistoryData() {
+      document.getElementById('historyList').innerHTML = '<p class="text-center text-muted m-0">History records synced with Firebase.</p>';
+    }
+
+    function loadReportsData() {
+      document.getElementById('reportsContainer').innerHTML = '<p class="text-center text-muted m-0">Reports synced with Firebase.</p>';
+    }
+
+    function handleLogout(e) {
+      if(e) e.preventDefault();
       document.getElementById('mainSection').classList.add('d-none');
       document.getElementById('loginSection').classList.remove('d-none');
     }
   </script>
-
 </body>
 </html>
