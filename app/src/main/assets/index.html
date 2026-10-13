@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roohani Imdad E-Raseed</title>
@@ -227,15 +228,28 @@
       document.getElementById('receiptResultView').classList.remove('d-none');
     });
 
-    function shareWhatsApp() {
-      const mobile = document.getElementById('rMobile').innerText.trim();
-      const text = `*Roohani Imdad Donation Receipt*\nReceipt No: ${document.getElementById('rNo').innerText}\nName: ${document.getElementById('rName').innerText}\nAmount: ₹${document.getElementById('rAmount').innerText}\nType: ${document.getElementById('rType').innerText}\nThank You!`;
-      
-      // Standard HTTP URL for WhatsApp to completely avoid ERR_UNKNOWN_URL_SCHEME in Android WebViews
-     const digits = mobile.replace(/\D/g, '');
-const phone = digits.length === 10 ? '91' + digits : digits;
-const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
-window.open(waUrl, '_blank'); 
+    async function shareWhatsApp() {
+  try {
+    const receipt = document.getElementById('printableReceipt');
+
+    if (typeof html2canvas === 'undefined') {
+      alert('JPEG library load nahi hui. Internet check karein.');
+      return;
+    }
+
+    const canvas = await html2canvas(receipt, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+
+    const jpeg = canvas.toDataURL('image/jpeg', 0.95);
+    AndroidPrint.shareReceiptImage(jpeg);
+
+  } catch (error) {
+    alert('Receipt image nahi bani: ' + error.message);
+  }
+    } 
     }
 
     function handleLogout(e) {
